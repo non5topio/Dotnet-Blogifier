@@ -16,8 +16,9 @@ RUN dotnet restore
 # Copy the rest of the code
 COPY . .
 
-# Install testing tools
-RUN dotnet tool install -g dotnet-reportgenerator-globaltool
+# Install testing tools with specific version and added retry mechanism
+RUN dotnet tool update -g dotnet-reportgenerator-globaltool --version 5.1.13 || \
+    (sleep 5 && dotnet tool update -g dotnet-reportgenerator-globaltool --version 5.1.13)
 
 # Add dotnet tools to PATH
 ENV PATH="${PATH}:/root/.dotnet/tools"
