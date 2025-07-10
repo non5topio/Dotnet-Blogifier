@@ -9,12 +9,12 @@
     "test-env-docker-stage": "test",
     "build-test-env-docker-stage-script-path": "tool/build-test-env-docker-stage.sh",
     "test-files-folders": [
-      "tests/Blogifier.Tests/PostTests.cs"
+      "tests/Blogifier.Tests/PostProviderTests.cs"
     ],
     "source-test-file-paths": [
       {
-        "source-file-path": "src/Blogifier/Posts/Post.cs",
-        "test-file-path": "tests/Blogifier.Tests/PostTests.cs"
+        "source-file-path": "src/Blogifier/Posts/PostProvider.cs",
+        "test-file-path": "tests/Blogifier.Tests/PostProviderTests.cs"
       }
     ],
     "test-command": "dotnet test --collect:'XPlat Code Coverage' --results-directory ./tests/TestResults && find ./tests/TestResults -name 'coverage.cobertura.xml' -exec cp {} ./tests/TestResults/coverage.cobertura.xml \\;",
