@@ -1,17 +1,35 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine as sdk
-# TOTO zh-CH
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-RUN apk add --no-cache npm
-# Copy everything else and build
-COPY ./ /opt/blogifier
-WORKDIR /opt/blogifier
-RUN ["dotnet","publish", "-c", "Release","/p:RuntimeIdentifier=linux-musl-x64", "./src/Blogifier/Blogifier.csproj","-o","dist" ]
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS test
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine as run
-# TOTO zh-CH
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-RUN apk add --no-cache icu-libs
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
-COPY --from=sdk /opt/blogifier/dist /opt/blogifier/
-WORKDIR /opt/blogifier
-ENTRYPOINT ["dotnet", "Blogifier.dll"]
+WORKDIR /app
+
+# Copy solution and project files
+COPY *.sln ./
+COPY src/Blogifier/*.csproj ./src/Blogifier/
+COPY src/Blogifier.Admin/*.csproj ./src/Blogifier.Admin/
+COPY src/Blogifier.Shared/*.csproj ./src/Blogifier.Shared/
+COPY src/Blogifier.Themes.Standard/*.csproj ./src/Blogifier.Themes.Standard/
+COPY tests/Blogifier.Tests/*.csproj ./tests/Blogifier.Tests/
+
+# Restore dependencies
+RUN dotnet restore
+
+# Copy the rest of the code
+COPY . .
+
+# Install testing tools
+RUN dotnet tool install -g dotnet-reportgenerator-globaltool
+
+# Add dotnet tools to PATH
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
+# Directory for your test generation app
+RUN mkdir -p /test-gen
+
+# This is where you'll add your binary app using a docker cp command after building this image
+# For example: docker cp your-test-gen-app.dll container-id:/test-gen/
+
+# Mount point for test generation configuration
+VOLUME ["/test-gen-config"]
+
+# Run tests with your custom configuration
+CMD ["bash", "-c", "dotnet test && echo 'Running test generation tool' && dotnet /test-gen/your-test-gen-app.dll /test-gen-config"]
