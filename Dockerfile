@@ -2,6 +2,14 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0.101 AS test
 
 WORKDIR /app
 
+# Install Node.js and npm
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copy solution and project files
 COPY *.sln ./
 COPY src/Blogifier/*.csproj ./src/Blogifier/
@@ -27,11 +35,5 @@ ENV PATH="${PATH}:/root/.dotnet/tools"
 # Directory for your test generation app
 RUN mkdir -p /test-gen
 
-# This is where you'll add your binary app using a docker cp command after building this image
-# For example: docker cp your-test-gen-app.dll container-id:/test-gen/
-
-# Mount point for test generation configuration
-VOLUME ["/test-gen-config"]
-
-# Run tests with your custom configuration
-CMD ["bash", "-c", "dotnet test && echo 'Running test generation tool' && dotnet /test-gen/your-test-gen-app.dll /test-gen-config"]
+# Run tests with code coverage
+CMD ["bash", "-c", "dotnet test --collect:'XPlat Code Coverage' --results-directory ./tests/TestResults && find ./tests/TestResults -name 'coverage.cobertura.xml' -exec cp {} ./tests/TestResults/coverage.cobertura.xml \\; && echo 'Tests completed with coverage'"]
