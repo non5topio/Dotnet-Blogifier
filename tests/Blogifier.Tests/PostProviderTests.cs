@@ -91,6 +91,218 @@ namespace Blogifier.Tests
                 Assert.Equal(postContent, savedPost.Content);
                 Assert.Equal(userId, savedPost.UserId);
             }
+/*
+FAILED TEST: **Analysis:**  
+The test run failed because the build process attempted to execute `npm i` (install Node.js packages), but the `npm` command is not found on the system. This is likely due to Node.js/npm not being installed or not available in the environment's PATH.
+
+**Recommended Fix:**  
+- Install Node.js and npm on the system running the tests.  
+- Alternatively, if Node.js is not required, modify the project files to remove or conditionally skip the `npm i` build commands.
+
+    [Fact]
+    public async Task AddAsync_WithMaliciousHtml_ContentAndDescriptionAreFiltered()
+    {
+        // Arrange
+        var userId = 1;
+        var title = "Test Post";
+        var content = "<script>alert('xss')</script>";
+        var description = "<img src=x onerror=alert(1)>";
+    
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .Options;
+    
+        var mapperMock = new Mock<IMapper>();
+        var context = new AppDbContext(options);
+    
+        var postProvider = new PostProvider(mapperMock.Object, context);
+    
+        // Act
+        var slug = await postProvider.AddAsync(new PostEditorDto
+        {
+            Title = title,
+            Content = content,
+            Description = description,
+            PostType = PostType.Post,
+            State = PostState.Draft
+        }, userId);
+    
+        // Assert
+        var savedPost = await context.Posts.FirstOrDefaultAsync(p => p.Slug == slug);
+        Assert.NotNull(savedPost);
+        Assert.DoesNotContain("<script>", savedPost.Content);
+        Assert.DoesNotContain("<img", savedPost.Description);
+    }
+
+*/
+/*
+FAILED TEST: **Analysis:**  
+The test run failed because the build process attempted to execute `npm i` (install Node.js packages), but the `npm` command is not found on the system. This is likely due to Node.js/npm not being installed or not available in the environment's PATH.
+
+**Recommended Fix:**  
+- Install Node.js and npm on the system running the tests.  
+- Alternatively, if Node.js is not required, modify the project files to remove or conditionally skip the `npm i` build commands.
+
+    [Fact]
+    public async Task GetSearchAsync_WithEmptyTerm_ReturnsAllPostsOrThrowsException()
+    {
+        // Arrange
+        var emptyTerm = "";
+        var page = 1;
+        var pageSize = 10;
+    
+        using (var context = new AppDbContext(_options))
+        {
+            // Add a test post
+            var post = new Post
+            {
+                Id = 1,
+                Title = "Test Post",
+                Content = "Test content",
+                Description = "Test description",
+                UserId = 1,
+                State = PostState.Release
+            };
+            context.Posts.Add(post);
+            await context.SaveChangesAsync();
+    
+            var postItemDto = new PostItemDto { Id = 1, Title = "Test Post", Content = "Test content", Description = "Test description" };
+    
+            _mapperMock.Setup(m => m.ProjectTo<PostItemDto>(It.IsAny<IQueryable<Post>>()))
+                .Returns(new List<PostItemDto> { postItemDto }.AsQueryable().BuildMock());
+    
+            var postProvider = new PostProvider(_mapperMock.Object, context);
+    
+            // Act
+            var result = await postProvider.GetSearchAsync(emptyTerm, page, pageSize);
+    
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result.Items);
+        }
+    }
+
+*/
+/*
+FAILED TEST: **Analysis:**  
+The test run failed because the build process attempted to execute `npm i` (install Node.js packages), but the `npm` command is not found on the system. This is likely due to Node.js/npm not being installed or not available in the environment's PATH.
+
+**Recommended Fix:**  
+- Install Node.js and npm on the system running the tests.  
+- Alternatively, if Node.js is not required, modify the project files to remove or conditionally skip the `npm i` build commands.
+
+    [Fact]
+    public async Task GetPostsAsync_WithInvalidPageSize_ReturnsEmptyListOrThrowsException()
+    {
+        // Arrange
+        var invalidPageSize = 0;
+        var page = 1;
+    
+        using (var context = new AppDbContext(_options))
+        {
+            var postProvider = new PostProvider(_mapperMock.Object, context);
+    
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => postProvider.GetPostsAsync(page, invalidPageSize));
+        }
+    }
+
+*/
+/*
+FAILED TEST: **Analysis:**  
+The test run failed because the build process attempted to execute `npm i` (install Node.js packages), but the `npm` command is not found on the system. This is likely due to Node.js/npm not being installed or not available in the environment's PATH.
+
+**Recommended Fix:**  
+- Install Node.js and npm on the system running the tests.  
+- Alternatively, if Node.js is not required, modify the project files to remove or conditionally skip the `npm i` build commands.
+
+    [Fact]
+    public async Task GetAsync_WithNonExistentSlug_ReturnsNullOrThrowsException()
+    {
+        // Arrange
+        var nonExistentSlug = "non-existent-slug";
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .Options;
+    
+        var mapperMock = new Mock<IMapper>();
+    
+        using (var context = new AppDbContext(options))
+        {
+            var postProvider = new PostProvider(mapperMock.Object, context);
+    
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => postProvider.GetAsync(nonExistentSlug));
+        }
+    }
+
+*/
+/*
+FAILED TEST: **Analysis:**  
+The test run failed because the build process attempted to execute `npm i` (install Node.js packages), but the `npm` command is not found on the system. This is likely due to Node.js/npm not being installed or not available in the environment's PATH.
+
+**Recommended Fix:**  
+- Install Node.js and npm on the system running the tests.  
+- Alternatively, if Node.js is not required, modify the project files to remove or conditionally skip the `npm i` build commands.
+
+    [Fact]
+    public async Task GetAsync_WithDuplicateSlugs_ReturnsFirstMatch()
+    {
+        // Arrange
+        var userId = 1;
+        var slug = "duplicate-slug";
+    
+        using (var context = new AppDbContext(_options))
+        {
+            // Add two posts with the same slug
+            var post1 = new Post { Id = 1, Title = "Post 1", Slug = slug, UserId = userId, State = PostState.Release };
+            var post2 = new Post { Id = 2, Title = "Post 2", Slug = slug, UserId = userId, State = PostState.Release };
+            context.Posts.Add(post1);
+            context.Posts.Add(post2);
+            await context.SaveChangesAsync();
+    
+            var postToHtmlDto1 = new PostToHtmlDto { Id = 1, Title = "Post 1", Slug = slug, Views = 0 };
+            var postToHtmlDto2 = new PostToHtmlDto { Id = 2, Title = "Post 2", Slug = slug, Views = 0 };
+    
+            _mapperMock.Setup(m => m.ProjectTo<PostToHtmlDto>(It.IsAny<IQueryable<Post>>()))
+                .Returns(new List<PostToHtmlDto> { postToHtmlDto1, postToHtmlDto2 }.AsQueryable().BuildMock());
+    
+            var postProvider = new PostProvider(_mapperMock.Object, context);
+    
+            // Act
+            var result = await postProvider.GetAsync(slug);
+    
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(postToHtmlDto1.Id, result.Post.Id);
+        }
+    }
+
+*/
+/*
+FAILED TEST: The test run failed because the build process attempted to execute `npm i` (install Node.js packages), but the `npm` command is not found on the system. This is likely due to Node.js/npm not being installed or not available in the environment's PATH.
+
+**Recommended Fix:**
+- Install Node.js and npm on the system running the tests.
+- Alternatively, if Node.js is not required, modify the project files to remove or conditionally skip the `npm i` build commands.
+
+    [Fact]
+    public async Task FirstAsync_WithNonExistentPostId_ThrowsException()
+    {
+        // Arrange
+        var userId = 1;
+        var nonExistentId = 999999999;
+    
+        using (var context = new AppDbContext(_options))
+        {
+            var postProvider = new PostProvider(_mapperMock.Object, context);
+    
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => postProvider.FirstAsync(nonExistentId));
+        }
+    }
+
+*/
         }
     }
 }
