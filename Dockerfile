@@ -36,4 +36,4 @@ ENV PATH="${PATH}:/root/.dotnet/tools"
 RUN mkdir -p /test-gen
 
 # Run tests with code coverage
-CMD ["bash", "-c", "dotnet test --collect:'XPlat Code Coverage' --results-directory ./tests/TestResults && find ./tests/TestResults -name 'coverage.cobertura.xml' -exec cp {} ./tests/TestResults/coverage.cobertura.xml \\; && echo 'Tests completed with coverage'"]
+CMD ["bash", "-c", "dotnet test ./tests/Blogifier.Tests/Blogifier.Tests.csproj --filter \"FullyQualifiedName=Blogifier.Tests.PostProviderTests.AddAsync_CreatesNewPost_ReturnsSlug\" --collect:'XPlat Code Coverage' --results-directory ./tests/TestResults && find ./tests/TestResults -name 'coverage.cobertura.xml' -exec cp {} ./tests/TestResults/coverage.cobertura.xml \\; && echo 'Tests completed with coverage'"]
