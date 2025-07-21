@@ -798,4 +798,337 @@ FAILED TEST: The test run failed due to the following issues:
 
 */
     }
+/*
+FAILED TEST: The test run failed due to **C# syntax errors** in the test file `PostProviderTests.cs`:
+
+### **Reasons for Failure:**
+1. **CS1529 Errors:** `using` clauses and executable code (e.g., `using (var context = new AppDbContext(...))`) are placed **outside of any class or method**, which is invalid in C#.
+2. **CS0246 Error:** The exception class `BlogNotIitializeException` is **misspelled** and likely not defined or referenced.
+3. **CS0116 Error:** Executable code is placed at the **namespace level**, which is not allowed.
+
+### **Recommended Fixes:**
+1. **Encapsulate all executable code** (e.g., `using` blocks, test logic) **inside a class or method**.
+2. **Correct the exception class name** from `BlogNotIitializeException` to `BlogNotInitializedException` in `PostProvider.cs` and ensure it is defined in the correct namespace (e.g., `Blogifier.Helper`).
+3. **Move all `using` directives** to the top of the file, before any class or method definitions.
+
+    using Blogifier.Posts;
+    using Blogifier.Data;
+    using Microsoft.EntityFrameworkCore;
+    using Moq;
+    using Xunit;
+    using System.Threading.Tasks;
+    using Blogifier.Shared;
+    
+    public class PostProviderTests
+    {
+        [Fact]
+        public async Task GetPostsAsync_WithInvalidPageSize_ReturnsEmptyListOrThrowsException()
+        {
+            // Arrange
+            var invalidPageSize = 0;
+            var page = 1;
+    
+            using (var context = new AppDbContext(_options))
+            {
+                var postProvider = new PostProvider(_mapperMock.Object, context);
+    
+                // Act & Assert
+                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => postProvider.GetPostsAsync(page, invalidPageSize));
+            }
+        }
+    }
+
+*/
+/*
+FAILED TEST: **Analysis:**
+
+The test run failed due to **C# syntax errors** in the `PostProviderTests.cs` file:
+
+1. **CS0116 Error:** Executable code (e.g., `using` blocks, method logic) is placed **outside of any class or method**, which is not allowed in C#.
+2. **CS0234 Error:** Missing reference to `Microsoft.VisualStudio.TestTools`, likely due to incorrect or unused `using Microsoft.VisualStudio.TestTools.UnitTesting;`.
+3. **CS0246 Error:** The exception class `BlogNotIitializeException` is **misspelled** and likely not defined or referenced.
+4. **Duplicate using directives:** Multiple `using` statements are repeated, causing warnings.
+
+---
+
+**Recommended Fixes:**
+
+1. **Encapsulate all executable code** (e.g., `using` blocks, test logic) **inside a class or method**.
+2. **Remove or correct the incorrect using directive:**
+   - Remove `using Microsoft.VisualStudio.TestTools.UnitTesting;` or replace with `using Xunit` if using xUnit.
+3. **Correct the exception class name:**
+   - Change `BlogNotIitializeException` to `BlogNotInitializedException`.
+   - Ensure the class is defined in the correct namespace (e.g., `Blogifier.Helper`) and is accessible.
+4. **Remove duplicate `using` directives** at the top of the file.
+5. **Move all `using` clauses** to the top of the file, before any class or method definitions.
+
+    [Fact]
+    public async Task GetSearchAsync_WithEmptyTerm_ReturnsAllPostsOrThrowsException()
+    {
+        // Arrange
+        var emptyTerm = "";
+        var page = 1;
+        var pageSize = 10;
+    
+        using (var context = new AppDbContext(_options))
+        {
+            // Add a test post
+            var post = new Post
+            {
+                Id = 1,
+                Title = "Test Post",
+                Content = "Test content",
+                Description = "Test description",
+                UserId = 1,
+                State = PostState.Release
+            };
+            context.Posts.Add(post);
+            await context.SaveChangesAsync();
+    
+            var postItemDto = new PostItemDto { Id = 1, Title = "Test Post", Content = "Test content", Description = "Test description" };
+    
+            _mapperMock.Setup(m => m.ProjectTo<PostItemDto>(It.IsAny<IQueryable<Post>>()))
+                .Returns(new List<PostItemDto> { postItemDto }.AsQueryable().BuildMock());
+    
+            var postProvider = new PostProvider(_mapperMock.Object, context);
+    
+            // Act
+            var result = await postProvider.GetSearchAsync(emptyTerm, page, pageSize);
+    
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result.Items);
+        }
+    }
+
+*/
+/*
+FAILED TEST: **Analysis:**
+
+The test run failed due to **C# syntax errors** in the test file `PostProviderTests.cs`:
+
+1. **CS1529 Error:** Multiple `using` clauses and executable code (e.g., `using (var context = new AppDbContext(...))`) are placed **outside of any class or method**, which is invalid in C#.
+2. **CS0246 Error:** The exception `BlogNotIitializeException` is **misspelled** and likely not defined or referenced correctly. The correct name is likely `BlogNotInitializedException`.
+3. **CS0116 Error:** Executable code (e.g., method logic, `using` blocks) is placed at the **namespace level**, which is not allowed.
+
+**Recommended Fixes:**
+
+1. **Encapsulate all executable code** (e.g., `using` blocks, test logic) **inside a class or method**.
+2. **Correct the exception name** from `BlogNotIitializeException` to `BlogNotInitializedException`.
+3. **Ensure the exception class** is defined in the correct namespace (e.g., `Blogifier.Helper`) and is accessible in the test project.
+4. **Move all `using` clauses** to the top of the file, before any class or method definitions.
+
+    using Blogifier.Blogs;
+    using Blogifier.Data;
+    using Blogifier.Posts;
+    using Blogifier.Shared;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Moq;
+    using NUnit.Framework;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    
+    namespace Blogifier.Tests
+    {
+        public class PostProviderTests
+        {
+            [Test]
+            public async Task AddAsync_WithMaliciousHtml_ContentAndDescriptionAreFiltered()
+            {
+                // Arrange
+                var userId = 1;
+                var title = "Test Post";
+                var content = "<script>alert('xss')</script>";
+                var description = "<img src=x onerror=alert(1)>";
+    
+                var options = new DbContextOptionsBuilder<AppDbContext>()
+                    .UseInMemoryDatabase(databaseName: "TestDatabase")
+                    .Options;
+    
+                var mapperMock = new Mock<IMapper>();
+                var context = new AppDbContext(options);
+    
+                var postProvider = new PostProvider(mapperMock.Object, context);
+    
+                // Act
+                var slug = await postProvider.AddAsync(new PostEditorDto
+                {
+                    Title = title,
+                    Content = content,
+                    Description = description,
+                    PostType = PostType.Post,
+                    State = PostState.Draft
+                }, userId);
+    
+                // Assert
+                var savedPost = await context.Posts.FirstOrDefaultAsync(p => p.Slug == slug);
+                Assert.NotNull(savedPost);
+                Assert.DoesNotContain("<script>", savedPost.Content);
+                Assert.DoesNotContain("<img", savedPost.Description);
+            }
+        }
+    }
+
+*/
+/*
+FAILED TEST: ### **Test Run Failure Analysis:**
+
+1. **CS0234 Error:** The `Helpers` namespace is missing or not referenced in the test project. This is required for `Blogifier.Tests.Helpers` usage.
+2. **CS0105 Warnings:** Duplicate `using` directives in the test file.
+3. **CS0116 Error:** The test file contains executable code (e.g., `using` blocks, method logic) outside of any class or method body, which is not allowed in C#.
+4. **CS0246 Error:** The exception class `BlogNotIitializeException` is missing or misspelled. It should be `BlogNotInitializedException`.
+
+---
+
+### **Recommended Fixes:**
+
+1. **Fix Missing Namespace/Assembly:**
+   - Ensure the `Blogifier.Tests.Helpers` namespace exists and is correctly referenced in the test project.
+   - If missing, create the `Helpers` folder/class or add the necessary project reference.
+
+2. **Remove Duplicate `using` Directives:**
+   - Clean up the `using` statements at the top of `PostProviderTests.cs` to remove duplicates.
+
+3. **Fix Syntax Error (CS0116):**
+   - Move all executable code (e.g., `using` blocks, test logic) inside a class or method.
+   - Ensure the file structure follows standard C# class/method syntax.
+
+4. **Correct Exception Class Name:**
+   - In `PostProvider.cs`, correct the typo from `BlogNotIitializeException` to `BlogNotInitializedException`.
+   - Ensure the exception class is defined in the correct namespace (e.g., `Blogifier.Helper`) and is accessible.
+
+5. **Ensure Proper Test Method Structure:**
+   - Wrap all test logic inside proper `[Fact]` or `[Theory]` methods.
+   - Avoid placing logic outside of method bodies.
+
+    [Fact]
+    public async Task GetAsync_WithDuplicateSlugs_ReturnsFirstMatch()
+    {
+        // Arrange
+        var userId = 1;
+        var slug = "duplicate-slug";
+    
+        using (var context = new AppDbContext(_options))
+        {
+            // Add two posts with the same slug
+            var post1 = new Post { Id = 1, Title = "Post 1", Slug = slug, UserId = userId, State = PostState.Release };
+            var post2 = new Post { Id = 2, Title = "Post 2", Slug = slug, UserId = userId, State = PostState.Release };
+            context.Posts.Add(post1);
+            context.Posts.Add(post2);
+            await context.SaveChangesAsync();
+    
+            var postToHtmlDto1 = new PostToHtmlDto { Id = 1, Title = "Post 1", Slug = slug, Views = 0 };
+            var postToHtmlDto2 = new PostToHtmlDto { Id = 2, Title = "Post 2", Slug = slug, Views = 0 };
+    
+            _mapperMock.Setup(m => m.ProjectTo<PostToHtmlDto>(It.IsAny<IQueryable<Post>>()))
+                .Returns(new List<PostToHtmlDto> { postToHtmlDto1, postToHtmlDto2 }.AsQueryable().BuildMock());
+    
+            var postProvider = new PostProvider(_mapperMock.Object, context);
+    
+            // Act
+            var result = await postProvider.GetAsync(slug);
+    
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(postToHtmlDto1.Id, result.Post.Id);
+        }
+    }
+
+*/
+/*
+FAILED TEST: ### **Test Run Failure Analysis:**
+
+The test run failed due to a **syntax error** in the test file `PostProviderTests.cs` at **line 809**, where a **namespace cannot directly contain executable code or statements**. This typically happens when code (like `using` blocks or method logic) is placed outside of a class or method body.
+
+---
+
+### **Recommended Fixes:**
+
+1. **Fix the misplaced code blocks:**
+   - Ensure all executable code (e.g., `using` blocks, method logic) is enclosed within a **class or method**.
+   - Specifically, the repeated `using (var context = new AppDbContext(...))` blocks and inline test logic are incorrectly placed outside any class/method.
+
+2. **Correct the typo in `BlogNotIitializeException`:**
+   - In `PostProvider.cs`, correct `BlogNotIitializeException` to `BlogNotInitializedException`.
+   - Ensure the exception class is defined and accessible in the correct namespace (likely `Blogifier.Helper` or `Blogifier.Blogs`).
+
+3. **Refactor the test file structure:**
+   - Reorganize `PostProviderTests.cs` to ensure all test methods and setup logic are properly enclosed within the `PostProviderTests` class.
+   - Remove or fix any duplicate or misplaced `using` directives and code fragments.
+
+4. **Avoid optional arguments in LINQ expressions (CS0854):**
+   - If encountered, explicitly provide all required parameters in LINQ expressions instead of using optional arguments.
+
+---
+
+### **Summary:**
+- **Primary Cause:** Syntax error due to misplaced code outside a class/method.
+- **Fix:** Refactor the test file to ensure all code is within a class/method and correct the exception class name typo.
+
+    [Fact]
+    public async Task GetAsync_WithNonExistentSlug_ThrowsException()
+    {
+        // Arrange
+        var nonExistentSlug = "non-existent-slug";
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .Options;
+    
+        var mapperMock = new Mock<IMapper>();
+    
+        using (var context = new AppDbContext(options))
+        {
+            var postProvider = new PostProvider(mapperMock.Object, context);
+    
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => postProvider.GetAsync(nonExistentSlug));
+        }
+    }
+
+*/
+/*
+FAILED TEST: **Analysis:**  
+The test run failed due to a syntax error in the test file (`PostProviderTests.cs`) at line 810, where a namespace cannot directly contain executable code or statements. This is likely due to misplaced or incomplete code blocks, such as an open `using` block or missing class/method structure.
+
+**Recommended Fix:**  
+- Ensure all code is properly enclosed within a class or method.
+- Close any open `using` blocks or fix misplaced code.
+- Validate that all test methods are correctly defined within a test class.
+
+    [Fact]
+    public async Task GetSlugFromTitle_With100DuplicateSlugs_ThrowsException()
+    {
+        // Arrange
+        var title = "duplicate-title";
+        var userId = 1;
+    
+        using (var context = new AppDbContext(_options))
+        {
+            // Add 100 posts with the same slug
+            for (int i = 0; i < 100; i++)
+            {
+                var post = new Post
+                {
+                    Id = i + 1,
+                    Title = title,
+                    Slug = title,
+                    UserId = userId,
+                    State = PostState.Draft,
+                    PostType = PostType.Post
+                };
+                context.Posts.Add(post);
+            }
+            await context.SaveChangesAsync();
+    
+            var postProvider = new PostProvider(_mapperMock.Object, context);
+    
+            // Act & Assert
+            await Assert.ThrowsAsync<BlogNotIitializeException>(() => postProvider.GetSlugFromTitle(title));
+        }
+    }
+
+*/
 }
