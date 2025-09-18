@@ -1,17 +1,17 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine as sdk
-# TOTO zh-CH
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-RUN apk add --no-cache npm
-# Copy everything else and build
-COPY ./ /opt/blogifier
-WORKDIR /opt/blogifier
-RUN ["dotnet","publish", "-c", "Release","/p:RuntimeIdentifier=linux-musl-x64", "./src/Blogifier/Blogifier.csproj","-o","dist" ]
+FROM mcr.microsoft.com/dotnet/sdk:8.0.101 AS test
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine as run
-# TOTO zh-CH
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-RUN apk add --no-cache icu-libs
-ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
-COPY --from=sdk /opt/blogifier/dist /opt/blogifier/
-WORKDIR /opt/blogifier
-ENTRYPOINT ["dotnet", "Blogifier.dll"]
+WORKDIR /app
+
+# Install Node.js (minimal - needed by some projects in the solution)
+RUN apt-get update && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy all the code
+COPY . .
+
+# Run tests with code coverage - dotnet test will automatically restore dependencies
+CMD ["bash", "-c", "time dotnet test ./tests/Blogifier.Tests/Blogifier.Tests.csproj --filter \"FullyQualifiedName=Blogifier.Tests.PostProviderTests.AddAsync_CreatesNewPost_ReturnsSlug\" --collect:'XPlat Code Coverage' --results-directory ./tests/TestResults --verbosity minimal && find ./tests/TestResults -name 'coverage.cobertura.xml' -exec cp {} ./tests/TestResults/coverage.cobertura.xml \\; && echo 'Tests completed with coverage'"]
