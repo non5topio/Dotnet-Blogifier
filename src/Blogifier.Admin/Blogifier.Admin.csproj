@@ -8,6 +8,8 @@
     <ClientAssetsDirectory>assets\</ClientAssetsDirectory>
     <ClientAssetsRestoreCommand>npm i</ClientAssetsRestoreCommand>
     <ClientAssetsBuildCommand>npm run build:$(Configuration)</ClientAssetsBuildCommand>
+    <!-- Skip client assets build during test runs -->
+    <ShouldRunClientAssetsBuild Condition="'$(IsTestProject)' == 'true' OR '$(BuildingForTest)' == 'true'">false</ShouldRunClientAssetsBuild>
   </PropertyGroup>
 
   <ItemGroup>
