@@ -2,6 +2,15 @@
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
+        <IsTestProject>true</IsTestProject>
+        <BuildingForTest>true</BuildingForTest>
+        <!-- Optimize build for testing -->
+        <DebugType>portable</DebugType>
+        <Optimize>false</Optimize>
+        <OutputType>Library</OutputType>
+        <!-- Skip unnecessary outputs -->
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,6 +25,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
     </ItemGroup>
 
     <ItemGroup>
