@@ -91,4 +91,11 @@ namespace Blogifier.Tests
                 Assert.Equal(postContent, savedPost.Content);
                 Assert.Equal(userId, savedPost.UserId);
             }
+        }
+
+
+        
+    }
+
+
 }
