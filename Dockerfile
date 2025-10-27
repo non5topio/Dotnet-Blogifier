@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0.101 AS test
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS test
 
 WORKDIR /app
 
