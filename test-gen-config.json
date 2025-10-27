@@ -15,7 +15,7 @@
       {
         "source-file-path": "src/Blogifier/Posts/PostProvider.cs",
         "test-file-path": "tests/Blogifier.Tests/PostProviderTests.cs",
-        "test-command": "dotnet test ./tests/Blogifier.Tests/Blogifier.Tests.csproj --filter \"FullyQualifiedName=Blogifier.Tests.PostProviderTests.AddAsync_CreatesNewPost_ReturnsSlug\" --collect:'XPlat Code Coverage' --results-directory ./tests/TestResults && find ./tests/TestResults -name 'coverage.cobertura.xml' -exec cp {} ./tests/TestResults/coverage.cobertura.xml \\;"
+        "test-command": "dotnet test ./tests/Blogifier.Tests/Blogifier.Tests.csproj --filter FullyQualifiedName~PostProviderTests --collect:'XPlat Code Coverage' --results-directory ./tests/TestResults && find ./tests/TestResults -name coverage.cobertura.xml -exec cp {} ./tests/TestResults/ \\;"
       }
     ],
     "coverage-type": "cobertura",
